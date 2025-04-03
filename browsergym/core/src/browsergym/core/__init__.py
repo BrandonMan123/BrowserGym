@@ -23,5 +23,7 @@ def _get_global_playwright():
 # register the open-ended task
 from .registration import register_task
 from .task import OpenEndedTask
+from .task import OnShapeTask
 
 register_task(OpenEndedTask.get_task_id(), OpenEndedTask)
+register_task(OnShapeTask.get_task_id(), OnShapeTask)
