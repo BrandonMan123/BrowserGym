@@ -3,6 +3,7 @@ from typing import Tuple
 
 import numpy as np
 import playwright.sync_api
+import time
 
 
 class AbstractBrowserTask(ABC):
@@ -116,16 +117,37 @@ class OnshapeTask(AbstractBrowserTask):
     def get_task_id(cls):
         return "onshape"
     
-
-    def __init__(self, seed: int, start_url: str, email: str, password: str) -> None:
+    def __init__(self, seed: int, 
+                 email: str, 
+                 password: str, 
+                 cad_id : str = None,
+                 goal: str = None) -> None:
         super().__init__(seed)
-        self.start_url = start_url
         self.email = email
         self.password = password
+        self.cad_id = cad_id # used for validation
+        self.goal = goal
 
     def setup(self, page: playwright.sync_api.Page) -> tuple[str, dict]:
-        page.goto(self.start_url, timeout=10000)
-        # TODO: login and click on "test" and set up
-        return self.goal, {}
+        page.goto("https://cad.onshape.com/signin", timeout=10000)
+        page.fill("input[name='email']", self.email)
+        page.fill("input[name='password']", self.password)
+        page.click("button[type='submit']")
+        page.click("text=Test")
+        time.sleep(3) # wait for the page to load
+        page.keyboard.press("Shift+5", delay=500)
+        time.sleep(1)
+        page.keyboard.press("Shift+s", delay=100)
+        page.click("text=Top", delay=100)
+        return self.goal, {}    
     
+    def validate(self, page: playwright.sync_api.Page, chat_messages: list[str]) -> Tuple[float, bool, str, dict]:
+        reward, done, msg, info = 0, False, "", {}
 
+        for message in chat_messages:
+            if message["role"] == "user" and message["message"] == "exit":
+                done = True
+                break
+
+        return reward, done, msg, info
+    
