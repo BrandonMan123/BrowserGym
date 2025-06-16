@@ -109,3 +109,23 @@ class OpenEndedTask(AbstractBrowserTask):
                 break
 
         return reward, done, msg, info
+
+
+class OnshapeTask(AbstractBrowserTask):
+    @classmethod
+    def get_task_id(cls):
+        return "onshape"
+    
+
+    def __init__(self, seed: int, start_url: str, email: str, password: str) -> None:
+        super().__init__(seed)
+        self.start_url = start_url
+        self.email = email
+        self.password = password
+
+    def setup(self, page: playwright.sync_api.Page) -> tuple[str, dict]:
+        page.goto(self.start_url, timeout=10000)
+        # TODO: login and click on "test" and set up
+        return self.goal, {}
+    
+
